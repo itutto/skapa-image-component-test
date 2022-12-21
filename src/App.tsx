@@ -3,7 +3,24 @@ import logo from './logo.svg';
 import Image from '@ingka/image';
 import '@ingka/image/dist/style.css';
 import '@ingka/svg-icon/dist/style.css';
+import '@ingka/button-webc';
+
 import './App.css';
+import type { Button, ExpandingButton, IconButton } from "@ingka/button-webc";
+declare global {
+  interface HTMLElementTagNameMap {
+    'skapa-button': Button,
+    'skapa-expanding-button': ExpandingButton,
+    'skapa-icon-button': IconButton,
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+    'skapa-button': React.HTMLAttributes<Button>,
+    'skapa-expanding-button': ExpandingButton,
+    'skapa-icon-button': IconButton,
+  }
+}
+}
 
 const startNewDesignImageAlt = 'Some alt text';
 const TEST_ID = {
@@ -17,7 +34,9 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
+      <skapa-button onClick={()=>{alert('wooho')}}>test</skapa-button>
         <div style={{ backgroundColor: 'black'}}>
+          
      {/*  <Image
           style={{ maxWidth: '3rem'}}
           src="https://media.newyorker.com/photos/5dfab39dde5fcf00086aec77/4:3/w_2271,h_1703,c_limit/Lane-Cats.jpg"
