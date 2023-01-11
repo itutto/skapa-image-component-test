@@ -1,0 +1,8 @@
+{
+    "name": "@ingka/jest-webc-preset",
+    "version": "0.0.1",
+    "main": "jest-preset.js",
+    "devDependencies": {
+        "babel-jest": "*"
+    }
+}

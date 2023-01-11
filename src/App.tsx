@@ -33,8 +33,14 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-      <skapa-button onClick={()=>{alert('wooho')}}>test</skapa-button>
+      <header id='' className="App-header">
+        
+      <skapa-button onClick={()=>{
+        console.log('button clicked')
+        //document.getElementById('sometest').focus();
+        //console.log('active: ', document.activeElement?.innerHTML);
+        }}>learn react</skapa-button>
+        <skapa-button id='sometest'>Testing this</skapa-button>
         <div style={{ backgroundColor: 'black'}}>
           
      {/*  <Image
