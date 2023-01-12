@@ -115,7 +115,6 @@
     "transformIgnorePatterns": [
       "^.+\\.module\\.(css|sass|scss)$"
     ],
-
     "modulePaths": [],
     "moduleNameMapper": {
       "^react-native$": "react-native-web",
@@ -145,6 +144,7 @@
     ]
   },
   "devDependencies": {
+    "@ingka/jest-preset-webc": "^0.0.1-alpha-263.9122",
     "ts-jest": "^27.1.5"
   }
 }
