@@ -11,12 +11,7 @@ var babel_jest_1 = __importDefault(require('babel-jest'));
 var config = {
   babelrc: false,
   presets: [
-    ['@babel/preset-env',
-      {
-        targets: {
-          node: 'current'
-        }
-      }]
+    ['@babel/preset-env', { targets: { node: 'current' } }]
   ]
 };
 exports.default = babel_jest_1.default.createTransformer(config);

@@ -1,53 +1,79 @@
 'use-strict';
-
 const Module = require('module');
 const fs = require('fs');
 const path = require('path');
-const oriPath = path.join(path.dirname(require.resolve('@jest/transform')), '/ScriptTransformer.js');
+const oriPath = path.join(path.dirname(require.resolve('@jest/transform')), '/ScriptTransformer.js'); // The file that holds the logic to decide if a file should be transformed or not.
+const findAllPaths = require('./findAllPaths.js');
+
+const runtimePath = require.resolve('jest-runtime');
+const runtimeContent = fs.readFileSync(runtimePath).toString();
+runtimeContent.replace('(.*strict.*?\n)',
+`$1\n
+require('/Users/istue/Code/BugReports/React18 - image/react18test/test-jest-preset/tools/patchJestTransform.js');
+`);
+
+const runtimeModule = new Module();
+runtimeModule.filename = runtimePath;
+runtimeModule.paths = [path.dirname(runtimePath)].concat(findAllPaths(path.dirname(runtimePath)));
+
+runtimeModule._compile(runtimeContent, runtimePath);
+
 
 const oriContent = fs.readFileSync(oriPath)
     .toString()
-    .replace(/(\s+)(shouldTransform\(filename\).*)/,
-    `$1$2\nif (/(@ingka|tslib|lit([^\\/]+)?)/.test(filename)) return true;`);
+    .replace(/(\s*[^.])(shouldTransform\(filename\).*)/, // Look for the `shouldTransform` function definition.
+    `$1$2
+    debugger; // this is injected
+    if (/(@ingka|tslib|lit)/.test(filename)) return true;
+    `); // and add an extra first line which will always report skapa web component related files as transformable. 
 
+
+fs.writeFileSync(path.resolve(__dirname, 'test-output.js'), oriContent, 'utf-8');
 
 const originalRequire = Module.prototype.require;
+    // Hijack Node's Module require function.
+    // If you're wondering why this extreme method is necessary:
+    // Jest has very limited controls: 
+    // - Presets are overridden by local configurations.
+    // - No plugin support.
+    //  and the users of Jest are typically not familiar enough with its API to come up with a correct configuration.
 Module.prototype.require = function () {
-    // Hijack the CRA webpack config import.
-    const tgt = arguments[0];
-    // console.log('require loads');
-    if (tgt && /fast-json-stable-stringify/.test(tgt)) {
-        console.log('whaaat');
-        debugger;
-    }
+    const tgt = arguments[0]; // The module name or path to be required.
+    // debugger;
     
-    if (tgt && /ScriptTransformer/.test(tgt)) {
-        const result = alteredModule.exports;
+
+    if (tgt && /jest-runtime/.test(tgt)) {
         debugger;
-        return result;
+        return runtimeModule.exports;
+
+    };
+    
+    // Check if it is the Jest's script transformer.
+    if (tgt && /ScriptTransformer/.test(tgt)) {
+        // If yes, then serve the one that always transforms the Skapa Web Component related ESModules into CJS.
+        const akarmi = require.cache;
+        debugger;
+        return alteredModule.exports;
     }
     
     // Behave unchanged otherwise
     return originalRequire.apply(this, arguments);
 };
+
+// debugger;
       
-function findAllPaths(basePath, result=[]) {
-    if (basePath === '/' || !fs.existsSync(basePath)) return result;
-    
-    const modulespath = path.resolve(basePath, 'node_modules');
-    if (fs.existsSync(modulespath) && !result.includes(modulespath)) result.push(modulespath)
-    
-    const parentDirPath = path.resolve(basePath, '../');
-    findAllPaths(parentDirPath, result);
-    
-    return result;
-} 
-
-
-const alteredModule = new Module(oriPath, require.resolve('@jest/transform'));
+var alteredModule = new Module(oriPath, require.resolve('@jest/transform'));
 alteredModule.filename = oriPath;
 alteredModule.paths = [''].concat(findAllPaths(path.dirname(oriPath)));
 
-
 alteredModule._compile(oriContent, oriPath);
-
+/* 
+(function something() {
+    const akarmi = require.cache;
+    const entry = Object.keys(require.cache).find(e => e.includes('ScriptTransform'));
+    if (!entry) return;
+    const isTheSame = entry.exports === alteredModule.exports;
+    
+    debugger;
+    entry.exports = alteredModule.exports;
+})(); */

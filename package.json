@@ -113,7 +113,9 @@
       "^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
     },
     "transformIgnorePatterns": [
-      "^.+\\.module\\.(css|sass|scss)$"
+      "^.+\\.module\\.(css|sass|scss)$",
+      "node_modules[\\/]lit",
+      "node_modules[\\/]@ingka/.*-webc"
     ],
     "modulePaths": [],
     "moduleNameMapper": {

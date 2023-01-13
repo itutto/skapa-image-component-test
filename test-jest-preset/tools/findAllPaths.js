@@ -1,7 +1,9 @@
+'use strict';
 const path = require('path');
 const fs = require('fs');
 
-const testpath = '/Users/istue/Code/BugReports/React18 - image/react18test/node_modules/@jest/transform/build';
+// This little helper tool will traverse a base path up and collectes each node_modules folder.
+// It used to provide a resolver lookup path for artifically created modules.
 function findAllPaths(basePath, result=[]) {
     if (basePath === '/' || !fs.existsSync(basePath)) return result;
     
@@ -14,5 +16,4 @@ function findAllPaths(basePath, result=[]) {
     return result;
 } 
 
-const result = findAllPaths(testpath);
-debugger;
+module.exports = findAllPaths;
