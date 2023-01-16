@@ -917,9 +917,6 @@ class ScriptTransformer {
     debugger; // this is injected
     if (/(@ingka|tslib|lit)/.test(filename)) return true;
     
-    // if (filename.includes('@ingka/button-webc')) return true;
-    // if (/(@ingka|tslib|lit)/.test(filename)) return true;
-    debugger; // this is manual
     const ignoreRegexp = this._cache.ignorePatternsRegExp;
     const isIgnored = ignoreRegexp ? ignoreRegexp.test(filename) : false;
     return this._config.transform.length !== 0 && !isIgnored;

@@ -4,19 +4,21 @@ const fs = require('fs');
 const path = require('path');
 const oriPath = path.join(path.dirname(require.resolve('@jest/transform')), '/ScriptTransformer.js'); // The file that holds the logic to decide if a file should be transformed or not.
 const findAllPaths = require('./findAllPaths.js');
-
+/* 
 const runtimePath = require.resolve('jest-runtime');
-const runtimeContent = fs.readFileSync(runtimePath).toString();
-runtimeContent.replace('(.*strict.*?\n)',
+const runtimeContent = fs.readFileSync(runtimePath)
+    .toString()
+    .replace('(.*strict.*?\n)',
 `$1\n
 require('/Users/istue/Code/BugReports/React18 - image/react18test/test-jest-preset/tools/patchJestTransform.js');
 `);
 
-const runtimeModule = new Module();
+const runtimeModule = new Module(runtimePath);
 runtimeModule.filename = runtimePath;
+runtimeModule.path = path.dirname(runtimePath);
 runtimeModule.paths = [path.dirname(runtimePath)].concat(findAllPaths(path.dirname(runtimePath)));
-
-runtimeModule._compile(runtimeContent, runtimePath);
+debugger;
+runtimeModule._compile(runtimeContent, runtimePath); */
 
 
 const oriContent = fs.readFileSync(oriPath)
@@ -39,15 +41,13 @@ const originalRequire = Module.prototype.require;
     //  and the users of Jest are typically not familiar enough with its API to come up with a correct configuration.
 Module.prototype.require = function () {
     const tgt = arguments[0]; // The module name or path to be required.
-    // debugger;
-    
-
-    if (tgt && /jest-runtime/.test(tgt)) {
+    debugger;
+/*      if (tgt && /jest-runtime/.test(tgt)) {
         debugger;
         return runtimeModule.exports;
 
     };
-    
+      */
     // Check if it is the Jest's script transformer.
     if (tgt && /ScriptTransformer/.test(tgt)) {
         // If yes, then serve the one that always transforms the Skapa Web Component related ESModules into CJS.
@@ -67,13 +67,3 @@ alteredModule.filename = oriPath;
 alteredModule.paths = [''].concat(findAllPaths(path.dirname(oriPath)));
 
 alteredModule._compile(oriContent, oriPath);
-/* 
-(function something() {
-    const akarmi = require.cache;
-    const entry = Object.keys(require.cache).find(e => e.includes('ScriptTransform'));
-    if (!entry) return;
-    const isTheSame = entry.exports === alteredModule.exports;
-    
-    debugger;
-    entry.exports = alteredModule.exports;
-})(); */
