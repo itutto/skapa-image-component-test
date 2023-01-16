@@ -10,9 +10,13 @@ function patchJestRunner() {
         patchedRunner = patchModule(runnerPath,
             src => src.replace(/(.*async runTests.*)/,
             `$1\n
+            const exceptionPattern = '^(?!(.*node_modules[\\/])(@ingka|lit|tslib))';
             tests.forEach(test => {
                 const ref = test.context.config.transformIgnorePatterns;
-                ref.map((p,i) => ref[i] = '(?!(node_modules[\\/])?(@ingka|lit|tslib))' + p);
+                ref.map((p,i) => {
+                    if (!p.includes(exceptionPattern))
+                        ref[i] = exceptionPattern + p;
+                });
             })
             `)
         );

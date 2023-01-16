@@ -1,8 +1,8 @@
 import React from 'react';
 import logo from './logo.svg';
 import Image from '@ingka/image';
-import '@ingka/image/dist/style.css';
-import '@ingka/svg-icon/dist/style.css';
+// import '@ingka/image/dist/style.css';
+// import '@ingka/svg-icon/dist/style.css';
 import '@ingka/button-webc';
 
 import './App.css';
