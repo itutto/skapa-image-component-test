@@ -6,6 +6,8 @@ Object.defineProperty(exports, '__esModule', {
 exports.createScriptTransformer = createScriptTransformer;
 exports.createTranspilingRequire = createTranspilingRequire;
 
+debugger;
+
 function _crypto() {
   const data = require('crypto');
 
@@ -914,9 +916,10 @@ class ScriptTransformer {
   }
 
   shouldTransform(filename) {
-    debugger; // this is injected
-    if (/(@ingka|tslib|lit)/.test(filename)) return true;
-    
+            debugger; // this is injected
+            if (/(@ingka|tslib|lit)/.test(filename)) return true;
+            
+
     const ignoreRegexp = this._cache.ignorePatternsRegExp;
     const isIgnored = ignoreRegexp ? ignoreRegexp.test(filename) : false;
     return this._config.transform.length !== 0 && !isIgnored;

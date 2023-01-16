@@ -1,5 +1,5 @@
 'use strict';
-require('./tools/patchJestTransform.js');
+// require('./tools/patchJestTransform.js');
 
 Object.defineProperty(exports, '__esModule', { value: true });
 

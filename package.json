@@ -88,6 +88,9 @@
     ]
   },
   "jest": {
+    "globals": {
+      "isThis": "visible"
+    },
     "preset": "<rootDir>/test-jest-preset",
     "roots": [
       "<rootDir>/src"
@@ -115,7 +118,7 @@
     "transformIgnorePatterns": [
       "^.+\\.module\\.(css|sass|scss)$",
       "node_modules[\\/]lit",
-      "node_modules[\\/]@ingka/.*-webc"
+      "node_modules[\\/]@ingka\/.*-webc"
     ],
     "modulePaths": [],
     "moduleNameMapper": {
