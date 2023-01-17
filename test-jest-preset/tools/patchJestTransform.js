@@ -10,13 +10,24 @@ function patchJestRunner() {
         patchedRunner = patchModule(runnerPath,
             src => src.replace(/(.*async runTests.*)/,
             `$1\n
-            const exceptionPattern = '^(?!(.*node_modules[\\/])(@ingka|lit|tslib))';
+            const exceptionPattern = '^(?!(.*node_modules[\\/])(@ingka|@?lit(-[^\\/]*)?|tslib)[\\/]).*';
+
             tests.forEach(test => {
                 const ref = test.context.config.transformIgnorePatterns;
                 ref.map((p,i) => {
                     if (!p.includes(exceptionPattern))
                         ref[i] = exceptionPattern + p;
                 });
+
+                const jestTransforms = test.context.config.transform;
+                const transformRuleIndex = jestTransforms.findIndex(tform => tform[0].includes('@ingka|tslib'));
+                if (transformRuleIndex > 0) {
+                    // let's make sure the SkapaWebComponents are transformed with the appropriate transformer.
+                    // this requires that the transformer of the preset to be in the first place of the transformers list.
+
+                    const skapaTransformer = jestTransforms.splice(transformRuleIndex, 1)[0]; // Removed from the array
+                    jestTransforms.unshift(skapaTransformer); // Added to the beginning.
+                }
             })
             `)
         );

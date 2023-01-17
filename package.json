@@ -88,9 +88,6 @@
     ]
   },
   "jest": {
-    "globals": {
-      "isThis": "visible"
-    },
     "preset": "<rootDir>/test-jest-preset",
     "roots": [
       "<rootDir>/src"
@@ -111,6 +108,7 @@
     ],
     "testEnvironment": "jsdom",
     "transform": {
+      "^.+\\.(js|jsx|ts)$": "babel-jest",
       "^.+\\.(jsx|mjs|cjs|ts|tsx)$": "<rootDir>/config/jest/babelTransform.js",
       "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
       "^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
@@ -118,7 +116,9 @@
     "transformIgnorePatterns": [
       "^.+\\.module\\.(css|sass|scss)$",
       "node_modules[\\/]lit",
-      "node_modules[\\/]@ingka\/.*-webc"
+      "node_modules[\\/]@ingka/.*-webc",
+      "/node_modules/",
+     "node_modules/(?!@)"
     ],
     "modulePaths": [],
     "moduleNameMapper": {
@@ -149,7 +149,7 @@
     ]
   },
   "devDependencies": {
-    "@ingka/jest-preset-webc": "^0.0.1-alpha-263.9122",
+    "@ingka/jest-preset-webc": "^0.0.1-alpha-265.9122",
     "ts-jest": "^27.1.5"
   }
 }
