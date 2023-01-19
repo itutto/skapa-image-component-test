@@ -3,6 +3,7 @@
     "version": "0.0.1",
     "main": "jest-preset.js",
     "devDependencies": {
-        "babel-jest": "*"
+        "babel-jest": "*",
+        "@babel/preset-env": "*"
     }
 }

@@ -8,9 +8,10 @@ let patchedRunner;
 function patchJestRunner() {
     if (!patchedRunner) {
         patchedRunner = patchModule(runnerPath,
-            src => src.replace(/(.*async runTests.*)/,
+            src => src.replace(/(.*\srunTests\(.*)/,
             `$1\n
             const exceptionPattern = '^(?!(.*node_modules[\\/])(@ingka|@?lit(-[^\\/]*)?|tslib)[\\/]).*';
+            const tranformRegexpString = "(@ingka|tslib|@?lit(-[^\\\\/]*)?)[\\\\/].+\\\\.js$";
 
             tests.forEach(test => {
                 const ref = test.context.config.transformIgnorePatterns;
@@ -20,15 +21,21 @@ function patchJestRunner() {
                 });
 
                 const jestTransforms = test.context.config.transform;
-                const transformRuleIndex = jestTransforms.findIndex(tform => tform[0].includes('@ingka|tslib'));
+                
+                const transformRuleIndex = jestTransforms.findIndex(tform => tform[0] === tranformRegexpString);
                 if (transformRuleIndex > 0) {
                     // let's make sure the SkapaWebComponents are transformed with the appropriate transformer.
                     // this requires that the transformer of the preset to be in the first place of the transformers list.
 
                     const skapaTransformer = jestTransforms.splice(transformRuleIndex, 1)[0]; // Removed from the array
                     jestTransforms.unshift(skapaTransformer); // Added to the beginning.
+                } else if (transformRuleIndex === -1) {
+                    // Let's inject the Skapa web components transform rule.
+                    jestTransforms.unshift([tranformRegexpString, '/Users/istue/Code/BugReports/React18 - image/react18test/test-jest-preset/transformer.js', {}]);
                 }
             })
+
+            debugger;
             `)
         );
     }
@@ -48,11 +55,12 @@ const originalRequire = Module.prototype.require;
 Module.prototype.require = function () {
     const tgt = arguments[0]; // The module name or path to be required.
 
-    if(tgt && /jest-runner/.test(tgt)) 
-        return patchJestRunner().exports;    
+    if(tgt && /jest-runner(.*index.js)?$/.test(tgt)) 
+        {
+            debugger;
+            return patchJestRunner().exports;    }
       
     // Behave unchanged otherwise
     return originalRequire.apply(this, arguments);
 };
 
-      

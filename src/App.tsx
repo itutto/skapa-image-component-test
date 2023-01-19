@@ -5,7 +5,7 @@ import Image from '@ingka/image';
 // import '@ingka/svg-icon/dist/style.css';
 import '@ingka/button-webc';
 
-import './App.css';
+// import './App.css';
 import type { Button, ExpandingButton, IconButton } from "@ingka/button-webc";
 declare global {
   interface HTMLElementTagNameMap {
@@ -15,7 +15,7 @@ declare global {
   }
   namespace JSX {
     interface IntrinsicElements {
-    'skapa-button': React.HTMLAttributes<Button>,
+    'skapa-button': React.DetailedHTMLProps<React.HTMLAttributes<Button>, Button> | Button // React.HTMLAttributes<Button> | Button,
     'skapa-expanding-button': ExpandingButton,
     'skapa-icon-button': IconButton,
   }
@@ -40,7 +40,7 @@ function App() {
         //document.getElementById('sometest').focus();
         //console.log('active: ', document.activeElement?.innerHTML);
         }}>learn react</skapa-button>
-        <skapa-button id='sometest'>Testing this</skapa-button>
+        <skapa-button id='sometest' variant={"primary" as const}>Testing this</skapa-button>
         <div style={{ backgroundColor: 'black'}}>
           
      {/*  <Image
