@@ -1,66 +1,72 @@
-'use-strict';
-const Module = require('module');
-const { patchModule } = require('./patchModule.js');
+"use-strict";
+const Module = require("module");
+const { patchModule } = require("./patchModule.js");
 
-const runnerPath = require.resolve('jest-runner');
+function escapeSlash(str) {
+  return str.replace(/\\/g, "\\\\");
+}
+
+const skapaTransformerPath = escapeSlash(
+  require.resolve("@ingka/jest-preset-webc/transformer.js")
+);
+const runnerPath = require.resolve("jest-runner");
 let patchedRunner;
 
+const exceptionPattern =
+  /^(?!(.*node_modules[\\/]+)(@ingka|@?lit(-[^\\/]*)?|tslib)[\\/]+).*/;
+
 function patchJestRunner() {
-    if (!patchedRunner) {
-        patchedRunner = patchModule(runnerPath,
-            src => src.replace(/(.*\srunTests\(.*)/,
-            `$1\n
-            const exceptionPattern = '^(?!(.*node_modules[\\/])(@ingka|@?lit(-[^\\/]*)?|tslib)[\\/]).*';
-            const tranformRegexpString = "(@ingka|tslib|@?lit(-[^\\\\/]*)?)[\\\\/].+\\\\.js$";
+  if (!patchedRunner) {
+    // This part overrides the `runTests` function of Jest which sets up the Jest workers.
+    // The alteration which is applied updates the transformIgnorePatterns in the configuration to make sure
+    // neither entry disables transform on the necessary resource files.
+    patchedRunner = patchModule(runnerPath, (src) =>
+      src.replace(
+        /(.*\srunTests\(.*)/,
+        `$1\n
+        const exceptionPattern = '${escapeSlash(exceptionPattern.toString())}';
+        debugger;
+        tests.forEach(test => {
+          const ref = test.context.config.transformIgnorePatterns;
+          ref.map((p,i) => {
+              if (!p.includes(exceptionPattern))
+                  ref[i] = exceptionPattern + p;
+          });
 
-            tests.forEach(test => {
-                const ref = test.context.config.transformIgnorePatterns;
-                ref.map((p,i) => {
-                    if (!p.includes(exceptionPattern))
-                        ref[i] = exceptionPattern + p;
-                });
+          const jestTransforms = test.context.config.transform;
+          const transformRuleIndex = jestTransforms.findIndex(tform => tform[0].includes('@ingka|tslib'));
+          if (transformRuleIndex > 0) {
+              // let's make sure the SkapaWebComponents are transformed with the appropriate transformer.
+              // this requires that the transformer of the preset to be in the first place of the transformers list.
 
-                const jestTransforms = test.context.config.transform;
-                
-                const transformRuleIndex = jestTransforms.findIndex(tform => tform[0] === tranformRegexpString);
-                if (transformRuleIndex > 0) {
-                    // let's make sure the SkapaWebComponents are transformed with the appropriate transformer.
-                    // this requires that the transformer of the preset to be in the first place of the transformers list.
+              const skapaTransformer = jestTransforms.splice(transformRuleIndex, 1)[0]; // Removed from the array
+              jestTransforms.unshift(skapaTransformer); // Added to the beginning.
+          } else if (transformRuleIndex === -1) {
+              // Let's inject the Skapa web components transform rule.
+              jestTransforms.unshift(["(@ingka|tslib|@?lit(-[^\\\\/]*)?)[\\\\/].+\\\\.js$", '${skapaTransformerPath}', {}]);
+          }
+      })
+      `
+      )
+    );
+  }
 
-                    const skapaTransformer = jestTransforms.splice(transformRuleIndex, 1)[0]; // Removed from the array
-                    jestTransforms.unshift(skapaTransformer); // Added to the beginning.
-                } else if (transformRuleIndex === -1) {
-                    // Let's inject the Skapa web components transform rule.
-                    jestTransforms.unshift([tranformRegexpString, '/Users/istue/Code/BugReports/React18 - image/react18test/test-jest-preset/transformer.js', {}]);
-                }
-            })
-
-            debugger;
-            `)
-        );
-    }
-
-    return patchedRunner;
+  return patchedRunner;
 }
- 
-
 
 const originalRequire = Module.prototype.require;
-    // Hijack Node's Module require function.
-    // If you're wondering why this extreme method is necessary:
-    // Jest has very limited controls: 
-    // - Presets are overridden by local configurations.
-    // - No plugin support.
-    //  and the users of Jest are typically not familiar enough with its API to come up with a correct configuration.
+// Hijack Node's Module require function.
+// If you're wondering why this extreme method is necessary:
+// Jest has very limited controls:
+// - Presets are overridden by local configurations.
+// - No plugin support.
+//  and the users of Jest are typically not familiar enough with its API to come up with a correct configuration.
 Module.prototype.require = function () {
-    const tgt = arguments[0]; // The module name or path to be required.
+  const tgt = arguments[0]; // The module name or path to be required.
 
-    if(tgt && /jest-runner(.*index.js)?$/.test(tgt)) 
-        {
-            debugger;
-            return patchJestRunner().exports;    }
-      
-    // Behave unchanged otherwise
-    return originalRequire.apply(this, arguments);
+  if (tgt && /jest-runner(.*index.js)?$/.test(tgt))
+    return patchJestRunner().exports; // Serve the altered module.
+
+  // Behave unchanged otherwise
+  return originalRequire.apply(this, arguments);
 };
-

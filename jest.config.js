@@ -2,7 +2,7 @@
 // require('@ingka/jest-preset-webc');
 
 const config = {
-  preset: '@ingka/jest-preset-webc',
+  preset: '<rootDir>/test-jest-preset',// '@ingka/jest-preset-webc',
   roots: [
     "<rootDir>/src"
   ],
