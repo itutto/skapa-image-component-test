@@ -1,15 +1,12 @@
 "use strict";
 require("./tools/patchJestTransform.js");
-
-const skapaMatchPattern = /(@ingka|tslib|@?lit(-[^\\/]*)?)[\\/].+\.js$/
-  .toString()
-  .replace(/^\/|\/$/g, ""); // trim the regexp symbols from beginning and end.
+const patterns = require('./patterns.js');
 
 Object.defineProperty(exports, "__esModule", { value: true });
 /** @type {import('jest').Config} */
 var config = {
   transform: {
-    [skapaMatchPattern]: require.resolve("./transformer.js"),
+    [patterns.escapedString.transformPattern]: require.resolve("./transformer.js"),
   },
 };
 module.exports = config;

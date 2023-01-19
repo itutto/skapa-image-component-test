@@ -1,20 +1,12 @@
 "use-strict";
 const Module = require("module");
 const { patchModule } = require("./patchModule.js");
+const patterns = require('../patterns.js');
+const escapeSlash = require('./escapeSlash.js');
 
-function escapeSlash(str) {
-  return str.replace(/\\/g, "\\\\");
-}
-
-const skapaTransformerPath = escapeSlash(
-  require.resolve("@ingka/jest-preset-webc/transformer.js")
-);
+const skapaTransformerPath = escapeSlash(require.resolve("@ingka/jest-preset-webc/transformer.js"));
 const runnerPath = require.resolve("jest-runner");
 let patchedRunner;
-
-const exceptionPattern =
-  /^(?!(.*node_modules[\\/]+)(@ingka|@?lit(-[^\\/]*)?|tslib)[\\/]+).*/;
-
 function patchJestRunner() {
   if (!patchedRunner) {
     // This part overrides the `runTests` function of Jest which sets up the Jest workers.
@@ -24,7 +16,7 @@ function patchJestRunner() {
       src.replace(
         /(.*\srunTests\(.*)/,
         `$1\n
-        const exceptionPattern = '${escapeSlash(exceptionPattern.toString())}';
+        const exceptionPattern = '${patterns.escapedString.transformIgnorePrefixPattern}';
         debugger;
         tests.forEach(test => {
           const ref = test.context.config.transformIgnorePatterns;
